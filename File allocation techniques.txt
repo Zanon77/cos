@@ -1,0 +1,159 @@
+i)  Sequential
+#include <stdio.h>
+#include <stdbool.h>
+int main() {
+    bool f[50] = { false }; // Array to represent disk blocks, initialized to all false (0)
+    int i, st, j, len, c;
+
+    do {
+        printf("\nEnter the starting block & length of file: ");
+        scanf("%d%d", &st, &len);
+
+        for (j = st; j < (st + len); j++) {
+            if (j >= 50 || f[j]) { // Check if block is out of bounds or already allocated
+                printf("Block already allocated or out of bounds");
+                break;
+            }
+            f[j] = true; // Mark block as allocated
+            printf("%d -> %s\n", j, f[j] ? "Allocated" : "Free");
+        }
+        if (j == (st + len)) // All blocks are successfully allocated
+            printf("\nThe file is allocated to disk");
+
+        printf("\nDo you want to enter more files? (1 for yes, 0 for no): ");
+        scanf("%d", &c);
+
+    } while (c == 1);
+
+    return 0;
+}
+
+
+
+ii)Indexed 
+#include <stdio.h>
+
+int f[50] = {0}; // Array to represent disk blocks, initialized to all 0
+int inde[50];
+
+int main() {
+    int i, k, j, n, c, count = 0, p;
+    do {
+        printf("Enter index block: ");
+        scanf("%d", &p);
+        if (f[p] == 0) {
+            f[p] = 1;
+            printf("Enter number of files on index: ");
+            scanf("%d", &n);
+        } else {
+            printf("Block already allocated\n");
+            continue; // Restart the loop       
+        }
+        int error = 0; // Flag to indicate if an error occurred during block allocation
+        for (i = 0; i < n; i++) {
+            printf("Enter block number for file %d: ", i + 1);
+            scanf("%d", &inde[i]);
+            if (f[inde[i]] == 1) {
+                printf("Block already allocated\n");
+                error = 1; // Set error flag
+                break; // Exit the loop
+            }        
+        }
+        if (error) // If an error occurred, go back to input index block
+            continue;
+        // If no errors, allocate blocks and print allocation information
+        for (j = 0; j < n; j++)
+            f[inde[j]] = 1;
+        printf("\nAllocated\n");
+        printf("File indexed\n");
+        for (k = 0; k < n; k++)
+            printf("%d -> %d:1\n", p, inde[k]);
+        printf("Enter 1 to enter more files and 0 to exit: ");
+        scanf("%d", &c);
+    } while (c == 1);
+    return 0;
+}
+
+
+ 
+iii)Linked
+#include <stdio.h>
+#include <stdlib.h>
+
+// Define a structure for a disk block
+struct DiskBlock {
+    int blockNumber;
+    int status; // 0 for free, 1 for allocated
+    struct DiskBlock* next;
+};
+
+// Function to allocate blocks for a file
+void allocateBlocks(struct DiskBlock* disk, int startBlock, int length) {
+    struct DiskBlock* current = disk;
+    int count = 0;
+    while (current != NULL && count < startBlock) {
+        current = current->next;
+        count++;
+    }
+    if (current == NULL) {
+        printf("Invalid starting block\n");
+        return;
+    }
+    for (int i = 0; i < length && current != NULL; i++) {
+        if (current->status == 0) {
+            current->status = 1; // Mark as allocated
+            printf("Block %d allocated\n", current->blockNumber);
+        } else {
+            printf("Block %d is already allocated\n", current->blockNumber);
+        }
+        current = current->next;
+    }
+}
+
+// Function to display disk status
+void displayDisk(struct DiskBlock* disk) {
+    printf("Disk Status:\n");
+    while (disk != NULL) {
+        printf("Block %d: %s\n", disk->blockNumber, disk->status == 0 ? "Free" : "Allocated");
+        disk = disk->next;
+    }
+}
+
+int main() {
+    // Create disk blocks
+    struct DiskBlock* disk = NULL;
+    struct DiskBlock* current = NULL;
+    int numBlocks;
+    printf("Enter the number of disk blocks: ");
+    scanf("%d", &numBlocks);
+    for (int i = 0; i < numBlocks; i++) {
+        if (disk == NULL) {
+            disk = (struct DiskBlock*)malloc(sizeof(struct DiskBlock));
+            current = disk;
+        } else {
+            current->next = (struct DiskBlock*)malloc(sizeof(struct DiskBlock));
+            current = current->next;
+        }
+        current->blockNumber = i;
+        current->status = 0; // Initially set as free
+        current->next = NULL;
+    }
+
+    int startBlock, length;
+    printf("Enter the starting block and length of the file: ");
+    scanf("%d %d", &startBlock, &length);
+    allocateBlocks(disk, startBlock, length);
+
+    displayDisk(disk);
+
+    // Free memory
+    current = disk;
+    while (disk != NULL) {
+        current = disk;
+        disk = disk->next;
+        free(current);
+    }
+
+    return 0;
+}
+

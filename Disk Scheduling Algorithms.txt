@@ -1,0 +1,341 @@
+i) FCFS disk scheduling algorithm
+#include<stdio.h>
+int main() {
+    int t[20], n, i, j, tohm[20], tot = 0;
+    float avhm;
+
+    printf("Enter the number of tracks: ");
+    scanf("%d", &n);
+
+    printf("Enter the tracks to be traversed: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &t[i]);
+
+    for (i = 0; i < n - 1; i++) {
+        tohm[i] = t[i + 1] - t[i];
+        if (tohm[i] < 0)
+            tohm[i] = -tohm[i];
+    }
+
+    for (i = 0; i < n - 1; i++)
+        tot += tohm[i];
+
+    avhm = (float)tot / n;
+
+    printf("\nTracks traversed\tDifference between tracks\n");
+    for (i = 0; i < n - 1; i++)
+        printf("%d\t\t\t%d\n", t[i], tohm[i]);
+
+    printf("\nAverage header movements: %f", avhm);
+
+    return 0;
+}
+
+
+
+
+ii) Scan disk scheduling algorithm
+#include<stdio.h>
+#include<conio.h>
+int main() {
+    int t[20], d[20], h, i, j, n, temp, k, atr[20], tot = 0, p, sum = 0;
+
+    // Input number of tracks to be traversed
+    printf("Enter the number of tracks to be traversed: ");
+    scanf("%d", &n);
+
+    // Input position of head
+    printf("Enter the position of head: ");
+    scanf("%d", &h);
+
+    // Initialize track array with head position
+    t[0] = 0;
+    t[1] = h;
+
+    // Input tracks
+    printf("Enter the tracks: ");
+    for (i = 2; i < n + 2; i++)
+        scanf("%d", &t[i]);
+
+    // Sort the tracks
+    for (i = 0; i < n + 2; i++) {
+        for (j = 0; j < (n + 2) - i - 1; j++) {
+            if (t[j] > t[j + 1]) {
+                temp = t[j];
+                t[j] = t[j + 1];
+                t[j + 1] = temp;
+            }
+        }
+    }
+
+    // Determine the position of head in sorted array
+    for (i = 0; i < n + 2; i++) {
+        if (t[i] == h) {
+            j = i;
+            k = i;
+        }
+    }
+
+    // Arrange tracks in the order of traversal
+    p = 0;
+    while (t[j] != 0) {
+        atr[p] = t[j];
+        j--;
+        p++;
+    }
+    atr[p] = t[j];
+    for (p = k + 1; p < n + 2; p++, k++)
+        atr[p] = t[k + 1];
+
+    // Calculate differences between adjacent tracks
+    printf("\nTracks traversed\tDifference between tracks\n");
+    for (j = 0; j < n + 1; j++) {
+        if (atr[j] > atr[j + 1])
+            d[j] = atr[j] - atr[j + 1];
+        else
+            d[j] = atr[j + 1] - atr[j];
+        printf("%d\t\t\t%d\n", atr[j], d[j]);
+        sum += d[j];
+    }
+
+    // Calculate average header movements
+    printf("\nAverage header movements: %f", (float)sum / n);
+
+    // Wait for a key press before exiting
+    getch();
+    return 0;
+}
+
+
+iii) C Scan disk scheduling algorithm
+#include<stdio.h> 
+#include<conio.h> 
+int main() {
+    int t[20], d[20], h, i, j, n, temp, k, atr[20], tot, p, sum = 0; 
+    
+    printf("Enter the number of tracks to be traversed: "); 
+    scanf("%d", &n);
+    
+    printf("Enter the position of head: "); 
+    scanf("%d", &h);
+    
+    printf("Enter total number of tracks: "); 
+    scanf("%d", &tot);
+    
+    t[0] = 0;
+    t[1] = h;
+    t[2] = tot - 1;
+    
+    printf("Enter the tracks: "); 
+    for(i = 3; i <= n + 2; i++)
+        scanf("%d", &t[i]); 
+    
+    for(i = 0; i <= n + 2; i++) {
+        for(j = 0; j <= (n + 2) - i - 1; j++) {
+            if(t[j] > t[j + 1]) {
+                temp = t[j]; 
+                t[j] = t[j + 1]; 
+                t[j + 1] = temp;
+            }
+        }
+    }
+
+    for(i = 0; i <= n + 2; i++) {
+        if(t[i] == h) {
+            j = i; 
+            break;
+        }
+    }
+    
+    p = 0;
+    while(t[j] != tot - 1) {
+        atr[p] = t[j]; 
+        j++;
+        p++;
+    }
+    
+    atr[p] = t[j]; 
+    p++;
+    i = 0;
+    while(p != (n + 3) && t[i] != t[h]) {
+        atr[p] = t[i]; 
+        i++;
+        p++;
+    }
+    
+    for(j = 0; j < n + 2; j++) {
+        if(atr[j] > atr[j + 1])
+            d[j] = atr[j] - atr[j + 1];
+        else
+            d[j] = atr[j + 1] - atr[j];
+        sum += d[j];
+    }
+    
+    printf("Total header movements: %d\n", sum);
+    printf("Average is: %f", (float)sum / n);
+    
+    getch();
+    return 0;
+}
+
+ 
+iv) LOOK
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, sum = 0, pos, diff;
+    printf("Enter the number of tracks: ");
+    scanf("%d", &n);
+    int tracks[n];
+
+    printf("Enter the position of head: ");
+    scanf("%d", &head);
+
+    printf("Enter the tracks: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &tracks[i]);
+
+    // Sort tracks in ascending order
+    for (i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (tracks[j] > tracks[j + 1]) {
+                int temp = tracks[j];
+                tracks[j] = tracks[j + 1];
+                tracks[j + 1] = temp;
+            }
+        }
+    }
+
+    // Find position of head in sorted array
+    for (i = 0; i < n; i++) {
+        if (tracks[i] > head) {
+            pos = i;
+            break;
+        }
+    }
+
+    printf("\nTracks traversed\tDifference between tracks\n");
+    for (i = pos - 1; i >= 0; i--) {
+        diff = abs(head - tracks[i]);
+        printf("%d\t\t\t%d\n", tracks[i], diff);
+        sum += diff;
+        head = tracks[i];
+    }
+
+    for (i = pos; i < n; i++) {
+        diff = abs(head - tracks[i]);
+        printf("%d\t\t\t%d\n", tracks[i], diff);
+        sum += diff;
+        head = tracks[i];
+    }
+
+    printf("\nTotal head movements: %d\n", sum);
+    printf("Average head movement: %f\n", (float)sum / n);
+
+    return 0;
+}
+
+
+v) CLOOK
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, sum = 0, pos, diff;
+    printf("Enter the number of tracks: ");
+    scanf("%d", &n);
+    int tracks[n];
+
+    printf("Enter the position of head: ");
+    scanf("%d", &head);
+
+    printf("Enter the tracks: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &tracks[i]);
+
+    // Sort tracks in ascending order
+    for (i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (tracks[j] > tracks[j + 1]) {
+                int temp = tracks[j];
+                tracks[j] = tracks[j + 1];
+                tracks[j + 1] = temp;
+            }
+        }
+    }
+
+    // Find position of head in sorted array
+    for (i = 0; i < n; i++) {
+        if (tracks[i] > head) {
+            pos = i;
+            break;
+        }
+    }
+
+    printf("\nTracks traversed\tDifference between tracks\n");
+    for (i = pos; i < n; i++) {
+        diff = abs(head - tracks[i]);
+        printf("%d\t\t\t%d\n", tracks[i], diff);
+        sum += diff;
+        head = tracks[i];
+    }
+
+    for (i = 0; i < pos; i++) {
+        diff = abs(head - tracks[i]);
+        printf("%d\t\t\t%d\n", tracks[i], diff);
+        sum += diff;
+        head = tracks[i];
+    }
+
+    printf("\nTotal head movements: %d\n", sum);
+    printf("Average head movement: %f\n", (float)sum / n);
+
+    return 0;
+}
+
+
+
+vi)SJF
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, sum = 0, pos, diff;
+    printf("Enter the number of tracks: ");
+    scanf("%d", &n);
+    int tracks[n];
+
+    printf("Enter the position of head: ");
+    scanf("%d", &head);
+
+    printf("Enter the tracks: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &tracks[i]);
+
+    // Sort tracks in ascending order
+    for (i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (tracks[j] > tracks[j + 1]) {
+                int temp = tracks[j];
+                tracks[j] = tracks[j + 1];
+                tracks[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nTracks traversed\tDifference between tracks\n");
+    for (i = 0; i < n; i++) {
+        diff = abs(head - tracks[i]);
+        printf("%d\t\t\t%d\n", tracks[i], diff);
+        sum += diff;
+        head = tracks[i];
+    }
+
+    printf("\nTotal head movements: %d\n", sum);
+    printf("Average head movement: %f\n", (float)sum / n);
+
+    return 0;
+}
+
+

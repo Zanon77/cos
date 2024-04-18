@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#define BUFFER_SIZE 5
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t buffer_empty = PTHREAD_COND_INITIALIZER;
+pthread_cond_t buffer_full = PTHREAD_COND_INITIALIZER;
+void *producer(void *arg) {
+    int item;
+    int num_items = *((int *)arg);
+    for (int i = 0; i < num_items; ++i) {
+        item = rand() % 100; // produce random item
+        pthread_mutex_lock(&mutex);
+        while ((in + 1) % BUFFER_SIZE == out) {
+            pthread_cond_wait(&buffer_empty, &mutex);
+        }
+        buffer[in] = item;
+        printf("Produced %d\n", item);
+        in = (in + 1) % BUFFER_SIZE;
+        pthread_cond_signal(&buffer_full);
+        pthread_mutex_unlock(&mutex);
+    }
+    pthread_exit(NULL);
+}
+void *consumer(void *arg) {
+    int item;
+    int num_items = *((int *)arg);
+    for (int i = 0; i < num_items; ++i) {
+        pthread_mutex_lock(&mutex);
+        while (in == out) {
+            pthread_cond_wait(&buffer_full, &mutex);
+        }
+
+        item = buffer[out];
+        printf("Consumed %d\n", item);
+        out = (out + 1) % BUFFER_SIZE;
+        pthread_cond_signal(&buffer_empty);
+        pthread_mutex_unlock(&mutex);
+    }
+    pthread_exit(NULL);
+}
+int main() {
+    int num_producers, num_consumers, num_items_per_producer;
+    printf("Enter number of producers: ");
+    scanf("%d", &num_producers);
+    printf("Enter number of consumers: ");
+    scanf("%d", &num_consumers);
+    printf("Enter number of items per producer: ");
+    scanf("%d", &num_items_per_producer);
+    pthread_t producer_threads[num_producers];
+    pthread_t consumer_threads[num_consumers];
+srand(time(NULL));
+    for (int i = 0; i < num_producers; ++i) {
+        pthread_create(&producer_threads[i], NULL, producer, &num_items_per_producer);
+    }
+    for (int i = 0; i < num_consumers; ++i) {
+        pthread_create(&consumer_threads[i], NULL, consumer, &num_items_per_producer);
+    }
+    for (int i = 0; i < num_producers; ++i) {
+        pthread_join(producer_threads[i], NULL);
+    }
+    for (int i = 0; i < num_consumers; ++i) {
+        pthread_join(consumer_threads[i], NULL);
+    }
+    return 0;
+}
