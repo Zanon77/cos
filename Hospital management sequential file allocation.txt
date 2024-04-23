@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Define structures for patient, doctor, appointment, etc.
+struct Patient {
+    int id;
+    char name[50];
+    // Add other fields as needed
+};
+
+// Function to add a patient to the database
+void addPatient(FILE *file) {
+    struct Patient patient;
+    printf("Enter patient ID: ");
+    scanf("%d", &patient.id);
+    printf("Enter patient name: ");
+    scanf("%s", patient.name);
+    // Add other information as needed
+    // Write patient record to file
+    fwrite(&patient, sizeof(struct Patient), 1, file);
+}
+
+// Function to display all patients
+void displayPatients(FILE *file) {
+    struct Patient patient;
+    rewind(file); // Move file pointer to the beginning
+    printf("Patients:\n");
+    while (fread(&patient, sizeof(struct Patient), 1, file) == 1) {
+        printf("ID: %d, Name: %s\n", patient.id, patient.name);
+        // Display other information as needed
+    }
+}
+
+int main() {
+    FILE *patientFile;
+    patientFile = fopen("patients.dat", "ab+"); // Open file for reading and appending in binary mode
+
+    if (patientFile == NULL) {
+        printf("Error in opening file.");
+        exit(1);
+    }
+
+    int choice;
+    do {
+        printf("\nHospital Management System\n");
+        printf("1. Add Patient\n");
+        printf("2. Display Patients\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                addPatient(patientFile);
+                break;
+            case 2:
+                displayPatients(patientFile);
+                break;
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
+
+    fclose(patientFile); // Close the file
+    return 0;
+}
