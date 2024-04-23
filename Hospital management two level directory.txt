@@ -1,183 +1,70 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define MAX_HOSPITALS 10
-#define MAX_DEPARTMENTS_PER_HOSPITAL 10
-#define MAX_DOCTORS_PER_DEPARTMENT 100
-#define MAX_PATIENTS_PER_DEPARTMENT 100
-
-struct Hospital {
-    char name[30];
-    char departments[MAX_DEPARTMENTS_PER_HOSPITAL][30];
-    char doctors[MAX_DEPARTMENTS_PER_HOSPITAL][MAX_DOCTORS_PER_DEPARTMENT][30];
-    char patients[MAX_DEPARTMENTS_PER_HOSPITAL][MAX_PATIENTS_PER_DEPARTMENT][30];
-    int num_departments;
-    int num_doctors[MAX_DEPARTMENTS_PER_HOSPITAL];
-    int num_patients[MAX_DEPARTMENTS_PER_HOSPITAL];
+// Define structures for patient, doctor, appointment, etc.
+struct Patient {
+    int id;
+    char name[50];
+    // Add other fields as needed
 };
 
+// Function to add a patient to the database
+void addPatient(FILE *file) {
+    struct Patient patient;
+    printf("Enter patient ID: ");
+    scanf("%d", &patient.id);
+    printf("Enter patient name: ");
+    scanf("%s", patient.name);
+    // Add other information as needed
+    // Write patient record to file
+    fwrite(&patient, sizeof(struct Patient), 1, file);
+}
+
+// Function to display all patients
+void displayPatients(FILE *file) {
+    struct Patient patient;
+    rewind(file); // Move file pointer to the beginning
+    printf("Patients:\n");
+    while (fread(&patient, sizeof(struct Patient), 1, file) == 1) {
+        printf("ID: %d, Name: %s\n", patient.id, patient.name);
+        // Display other information as needed
+    }
+}
+
 int main() {
-    struct Hospital hospitals[MAX_HOSPITALS];
-    int num_hospitals = 0;
+    FILE *patientFile;
+    patientFile = fopen("patients.dat", "ab+"); // Open file for reading and appending in binary mode
 
-    while (1) {
-        printf("\n\n1. Add Hospital\t2. Add Department\t3. Add Doctor\t4. Add Patient\n");
-        printf("5. Display Hospitals\t6. Exit\nEnter your choice: ");
-
-        int choice;
-        scanf("%d", &choice);
-
-        switch (choice) {
-            case 1:
-                if (num_hospitals >= MAX_HOSPITALS) {
-                    printf("Maximum number of hospitals reached\n");
-                    break;
-                }
-                printf("Enter name of the hospital: ");
-                scanf("%s", hospitals[num_hospitals].name);
-                hospitals[num_hospitals].num_departments = 0;
-                num_hospitals++;
-                printf("Hospital added\n");
-                break;
-
-            case 2:
-                if (num_hospitals == 0) {
-                    printf("No hospitals added yet\n");
-                    break;
-                }
-                printf("Enter name of the hospital to add department: ");
-                char hospital_name[30];
-                scanf("%s", hospital_name);
-                int hospital_index = -1;
-                for (int i = 0; i < num_hospitals; i++) {
-                    if (strcmp(hospitals[i].name, hospital_name) == 0) {
-                        hospital_index = i;
-                        break;
-                    }
-                }
-                if (hospital_index == -1) {
-                    printf("Hospital not found\n");
-                    break;
-                }
-                if (hospitals[hospital_index].num_departments >= MAX_DEPARTMENTS_PER_HOSPITAL) {
-                    printf("Maximum number of departments reached for this hospital\n");
-                    break;
-                }
-                printf("Enter name of the department: ");
-                scanf("%s", hospitals[hospital_index].departments[hospitals[hospital_index].num_departments]);
-                hospitals[hospital_index].num_doctors[hospitals[hospital_index].num_departments] = 0;
-                hospitals[hospital_index].num_patients[hospitals[hospital_index].num_departments] = 0;
-                hospitals[hospital_index].num_departments++;
-                printf("Department added\n");
-                break;
-
-            case 3:
-                printf("Enter name of the hospital: ");
-                scanf("%s", hospital_name);
-                hospital_index = -1;
-                for (int i = 0; i < num_hospitals; i++) {
-                    if (strcmp(hospitals[i].name, hospital_name) == 0) {
-                        hospital_index = i;
-                        break;
-                    }
-                }
-                if (hospital_index == -1) {
-                    printf("Hospital not found\n");
-                    break;
-                }
-                printf("Enter name of the department to add doctor: ");
-                char department_name[30];
-                scanf("%s", department_name);
-                int department_index_d = -1;
-                for (int i = 0; i < hospitals[hospital_index].num_departments; i++) {
-                    if (strcmp(hospitals[hospital_index].departments[i], department_name) == 0) {
-                        department_index_d = i;
-                        break;
-                    }
-                }
-                if (department_index_d == -1) {
-                    printf("Department not found\n");
-                    break;
-                }
-                if (hospitals[hospital_index].num_doctors[department_index_d] >= MAX_DOCTORS_PER_DEPARTMENT) {
-                    printf("Maximum number of doctors reached for this department\n");
-                    break;
-                }
-                printf("Enter name of the doctor: ");
-                scanf("%s", hospitals[hospital_index].doctors[department_index_d][hospitals[hospital_index].num_doctors[department_index_d]]);
-                hospitals[hospital_index].num_doctors[department_index_d]++;
-                printf("Doctor added\n");
-                break;
-
-            case 4:
-                printf("Enter name of the hospital: ");
-                scanf("%s", hospital_name);
-                hospital_index = -1;
-                for (int i = 0; i < num_hospitals; i++) {
-                    if (strcmp(hospitals[i].name, hospital_name) == 0) {
-                        hospital_index = i;
-                        break;
-                    }
-                }
-                if (hospital_index == -1) {
-                    printf("Hospital not found\n");
-                    break;
-                }
-                printf("Enter name of the department to add patient: ");
-                scanf("%s", department_name);
-                int department_index_p = -1;
-                for (int i = 0; i < hospitals[hospital_index].num_departments; i++) {
-                    if (strcmp(hospitals[hospital_index].departments[i], department_name) == 0) {
-                        department_index_p = i;
-                        break;
-                    }
-                }
-                if (department_index_p == -1) {
-                    printf("Department not found\n");
-                    break;
-                }
-                if (hospitals[hospital_index].num_patients[department_index_p] >= MAX_PATIENTS_PER_DEPARTMENT) {
-                    printf("Maximum number of patients reached for this department\n");
-                    break;
-                }
-                printf("Enter name of the patient: ");
-                scanf("%s", hospitals[hospital_index].patients[department_index_p][hospitals[hospital_index].num_patients[department_index_p]]);
-                hospitals[hospital_index].num_patients[department_index_p]++;
-                printf("Patient added\n");
-                break;
-
-             case 5:
-                printf("\n%-15s%-15s%-15s%-15s", "Hospitals", "Departments", "Doctors", "Patients");
-                for (int i = 0; i < num_hospitals; i++) {
-                    printf("\n%-15s", hospitals[i].name);
-                    for (int j = 0; j < hospitals[i].num_departments; j++) {
-                        printf("%-15s", hospitals[i].departments[j]);
-                        for (int k = 0; k < hospitals[i].num_doctors[j]; k++) {
-                            if (k == 0) {
-                                printf("%-15s", hospitals[i].doctors[j][k]);
-                            } else {
-                                printf("%-15s", "");
-                            }
-                        }
-                        for (int l = 0; l < hospitals[i].num_patients[j]; l++) {
-                            if (l == 0) {
-                                printf("%-15s", hospitals[i].patients[j][l]);
-                            } else {
-                                printf("%-15s", "");
-                            }
-                        }
-                    }
-                }
-                break;
-
-            case 6:
-                return 0;
-
-            default:
-                printf("Invalid choice. Please try again.\n");
-                break;
-        }
+    if (patientFile == NULL) {
+        printf("Error in opening file.");
+        exit(1);
     }
 
+    int choice;
+    do {
+        printf("\nHospital Management System\n");
+        printf("1. Add Patient\n");
+        printf("2. Display Patients\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1:
+                addPatient(patientFile);
+                break;
+            case 2:
+                displayPatients(patientFile);
+                break;
+            case 3:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
+
+    fclose(patientFile); // Close the file
     return 0;
 }
