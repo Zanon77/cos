@@ -1,0 +1,70 @@
+#include <stdio.h>
+
+#define MAX_PROCESSES 10
+#define MAX_RESOURCES 10
+
+int allocation[MAX_PROCESSES][MAX_RESOURCES];  // Allocation matrix
+int request[MAX_PROCESSES][MAX_RESOURCES];    // Request matrix
+
+// Function to initialize the matrices
+void initialize() {
+    // Initialize matrices with zeros
+    for (int i = 0; i < MAX_PROCESSES; ++i) {
+        for (int j = 0; j < MAX_RESOURCES; ++j) {
+            allocation[i][j] = 0;
+            request[i][j] = 0;
+        }
+    }
+}
+
+// Function to add an edge from process to resource (allocation)
+void allocate(int process, int resource) {
+    allocation[process][resource] = 1;
+}
+
+// Function to add an edge from resource to process (request)
+void request_resource(int process, int resource) {
+    request[process][resource] = 1;
+}
+
+// Function to display the Resource Allocation Graph
+void display_RAG() {
+    printf("Resource Allocation Graph:\n");
+    printf("Processes --> Resources\n");
+    for (int i = 0; i < MAX_PROCESSES; ++i) {
+        printf("P%d -> ", i);
+        for (int j = 0; j < MAX_RESOURCES; ++j) {
+            if (allocation[i][j] == 1) {
+                printf("R%d ", j);
+            }
+        }
+        printf("\n");
+    }
+    printf("Resources --> Processes\n");
+    for (int i = 0; i < MAX_PROCESSES; ++i) {
+        printf("R%d -> ", i);
+        for (int j = 0; j < MAX_RESOURCES; ++j) {
+            if (request[i][j] == 1) {
+                printf("P%d ", j);
+            }
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    initialize();
+    
+    // Example: Allocate resources
+    allocate(0, 1); // Process 0 allocates Resource 1
+    allocate(1,3);
+    
+    // Example: Process 1 requests Resource 0
+    request_resource(1, 0);
+    request_resource(1,2);
+    
+    // Display the Resource Allocation Graph
+    display_RAG();
+    
+    return 0;
+}

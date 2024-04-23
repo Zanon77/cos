@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <pthread.h>
+
+#define MAX_PRINTS 100
+
+/* Global counter variable */
+int counter = 0;
+
+/* Thread function definition */
+void* threadFunction(void* args) {
+    while (counter < MAX_PRINTS) {
+        printf("I am threadFunction: %d\n", counter++);
+    }
+    return NULL;
+}
+
+int main() {
+    /* Creating thread id */
+    pthread_t id;
+    int ret;
+
+    /* Creating thread */
+    ret = pthread_create(&id, NULL, &threadFunction, NULL);
+    if (ret == 0) {
+        printf("Thread created successfully.\n");
+    } else {
+        printf("Thread not created: %d\n", ret);
+        return 1; /* Return with error status */
+    }
+
+    /* Main function loop */
+    while (counter < MAX_PRINTS) {
+        printf("I am main function: %d\n", counter++);
+    }
+
+    /* Wait for the thread to finish */
+    pthread_join(id, NULL);
+
+    return 0;
+}
+
+
+ sh-4.3$ gcc thread.c -o thread -lpthread
+    sh-4.3$ ./thread

@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+  // Create a new process using the fork() system call.
+  pid_t pid = fork();
+
+  if (pid == 0) {
+    // This is the child process.
+    // Execute the new program using the exec() system call.
+    execlp("/bin/ls", "ls", "-l", NULL);
+  } else {
+    // This is the parent process.
+    // Wait for the child process to finish using the wait() system call.
+    int status;
+    wait(&status);
+
+    // Print the exit status of the child process.
+    printf("Child process exited with status %d\n", status);
+  }
+
+  return 0;
+}
