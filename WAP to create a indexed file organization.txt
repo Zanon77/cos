@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_RECORDS 100
+#define MAX_NAME_LENGTH 50
+
+// Structure for storing record data
+struct Record {
+    int id;
+    char name[MAX_NAME_LENGTH];
+    // Add other fields as needed
+};
+
+// Structure for index entry
+struct IndexEntry {
+    int id;
+    long offset; // File offset where the record is stored
+};
+
+// Function to add a new record to the file and update the index
+void addRecord(FILE *file, struct IndexEntry index[], int *numRecords) {
+    struct Record newRecord;
+    printf("Enter ID: ");
+    scanf("%d", &newRecord.id);
+    printf("Enter Name: ");
+    scanf("%s", newRecord.name);
+
+    // Writing record to file
+    fseek(file, 0, SEEK_END); // Move to end of file
+    fwrite(&newRecord, sizeof(struct Record), 1, file);
+
+    // Updating index
+    index[*numRecords].id = newRecord.id;
+    index[*numRecords].offset = ftell(file) - sizeof(struct Record);
+    (*numRecords)++;
+}
+
+// Function to retrieve a record by its ID
+void retrieveRecord(FILE *file, struct IndexEntry index[], int numRecords) {
+    int id;
+    printf("Enter ID to retrieve: ");
+    scanf("%d", &id);
+
+    // Searching for record in index
+    for (int i = 0; i < numRecords; i++) {
+        if (index[i].id == id) {
+            // Found record, seek to its location in file and read
+            fseek(file, index[i].offset, SEEK_SET);
+            struct Record record;
+            fread(&record, sizeof(struct Record), 1, file);
+            printf("ID: %d, Name: %s\n", record.id, record.name);
+            return;
+        }
+    }
+    printf("Record with ID %d not found.\n", id);
+}
+
+int main() {
+    FILE *file = fopen("records.dat", "wb+");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    struct IndexEntry index[MAX_RECORDS];
+    int numRecords = 0;
+
+    while (1) {
+        int choice;
+        printf("\n1. Add Record\n2. Retrieve Record\n3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addRecord(file, index, &numRecords);
+                break;
+            case 2:
+                retrieveRecord(file, index, numRecords);
+                break;
+            case 3:
+                fclose(file);
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
+
+
